@@ -47,13 +47,13 @@ void JMETriggerAnalysisDriverRun3::init(){
            {"offlPFCorr", "offlineAK4PFCHSJetsCorrected"},
            {"hltPFPuppiCorr", "hltAK4PFPuppiJetsCorrected"},
            {"offlPFPuppiCorr", "offlineAK4PFPuppiJetsCorrected"}}},
-    {"hltAK4CaloJets"              , {{"GEN", "ak4GenJetsNoNu"}}},
-    {"hltAK4CaloJetsCorrected"     , {{"GEN", "ak4GenJetsNoNu"}}},
+    {"hltAK4CaloJets"              , {{"GEN", "ak4GenJetsNoNu"}, {"Offline", "offlineAK4PFPuppiJetsCorrected"}}},
+    {"hltAK4CaloJetsCorrected"     , {{"GEN", "ak4GenJetsNoNu"}, {"Offline", "offlineAK4PFPuppiJetsCorrected"}}},
     {"hltAK4PFClusterJets"         , {{"GEN", "ak4GenJetsNoNu"}}},
     {"hltAK4PFClusterJetsCorrected", {{"GEN", "ak4GenJetsNoNu"}}},
-    {"hltAK4PFJets"                , {{"GEN", "ak4GenJetsNoNu"}}},
+    {"hltAK4PFJets"                , {{"GEN", "ak4GenJetsNoNu"}, {"Offline", "offlineAK4PFPuppiJetsCorrected"}}},
     {"hltAK4PFJetsCorrected"       , {{"GEN", "ak4GenJetsNoNu"}, {"Offline", "offlineAK4PFPuppiJetsCorrected"}}},
-    {"hltAK4PFPuppiJets"           , {{"GEN", "ak4GenJetsNoNu"}}},
+    {"hltAK4PFPuppiJets"           , {{"GEN", "ak4GenJetsNoNu"}, {"Offline", "offlineAK4PFPuppiJetsCorrected"}}},
     {"hltAK4PFPuppiJetsCorrected"  , {{"GEN", "ak4GenJetsNoNu"}, {"Offline", "offlineAK4PFPuppiJetsCorrected"}}},
     {"offlineAK4PFCHSJetsCorrected"   , {{"GEN", "ak4GenJetsNoNu"}, {"HLT", "hltAK4PFJetsCorrected"}}},
     {"offlineAK4PFPuppiJetsCorrected", {{"GEN", "ak4GenJetsNoNu"}, {"HLT", "hltAK4PFJetsCorrected"}}},
@@ -121,63 +121,63 @@ void JMETriggerAnalysisDriverRun3::init(){
     bookHistograms_METMHT(selLabel);
   }
 
-  jettriggers = {
-  "HLT_PFJet140",
-  "HLT_PFJet320",
-  "HLT_PFJet500",
-  };
-
-  for(auto const& selLabel : jettriggers){
-    for(auto const& jetLabel : labelMap_jetAK4_){
-      bookHistograms_Jets(selLabel, jetLabel.first, utils::mapKeys(jetLabel.second));
-    } 
-  }
-
-  httriggers = {
-  "HLT_PFHT780",
-  "HLT_PFHT890",
-  "HLT_PFHT1050",
-  };
-
-  for(auto const& selLabel : httriggers){
-    for(auto const& jetLabel : labelMap_jetAK4_){
-      bookHistograms_Jets(selLabel, jetLabel.first, utils::mapKeys(jetLabel.second));
-    }
-    bookHistograms_Jets_2DMaps(selLabel, "hltAK4PFJetsCorrected", "offlineAK4PFCHSJetsCorrected");
-    bookHistograms_Jets_2DMaps(selLabel, "hltAK4PFPuppiJetsCorrected", "offlineAK4PFPuppiJetsCorrected");
-  }
-
-  mettriggers = {
-  "HLT_PFMET120_PFMHT120_IDTight",
-  "HLT_PFMETTypeOne120_PFMHT120_IDTight",
-  "HLT_PFMET140_PFMHT140_IDTight",
-  "HLT_PFMETTypeOne140_PFMHT140_IDTight",
-  };
-
-  for(auto const& selLabel : mettriggers){
-    for(auto const& metLabel : labelMap_MET_){
-      bookHistograms_MET(selLabel, metLabel.first, utils::mapKeys(metLabel.second));
-    }
-    bookHistograms_METMHT(selLabel);
-  }
-
-  puintervals = {
-  "PU0to20",
-  "PU20to40",
-  "PUgt40",
-  "PU0to20_HLT",
-  "PU20to40_HLT",
-  "PUgt40_HLT",
-  "PU0to20_HLT_TypeOne",
-  "PU20to40_HLT_TypeOne",
-  "PUgt40_HLT_TypeOne",
-  };
-
-  for(auto const& selLabel : puintervals){
-    for(auto const& metLabel : labelMap_MET_){
-      bookHistograms_MET(selLabel, metLabel.first, utils::mapKeys(metLabel.second));
-    }
-  }
+//  jettriggers = {
+//  "HLT_PFJet140",
+//  "HLT_PFJet320",
+//  "HLT_PFJet500",
+//  };
+//
+//  for(auto const& selLabel : jettriggers){
+//    for(auto const& jetLabel : labelMap_jetAK4_){
+//      bookHistograms_Jets(selLabel, jetLabel.first, utils::mapKeys(jetLabel.second));
+//    } 
+//  }
+//
+//  httriggers = {
+//  "HLT_PFHT780",
+//  "HLT_PFHT890",
+//  "HLT_PFHT1050",
+//  };
+//
+//  for(auto const& selLabel : httriggers){
+//    for(auto const& jetLabel : labelMap_jetAK4_){
+//      bookHistograms_Jets(selLabel, jetLabel.first, utils::mapKeys(jetLabel.second));
+//    }
+//    bookHistograms_Jets_2DMaps(selLabel, "hltAK4PFJetsCorrected", "offlineAK4PFCHSJetsCorrected");
+//    bookHistograms_Jets_2DMaps(selLabel, "hltAK4PFPuppiJetsCorrected", "offlineAK4PFPuppiJetsCorrected");
+//  }
+//
+//  mettriggers = {
+//  "HLT_PFMET120_PFMHT120_IDTight",
+//  "HLT_PFMETTypeOne120_PFMHT120_IDTight",
+//  "HLT_PFMET140_PFMHT140_IDTight",
+//  "HLT_PFMETTypeOne140_PFMHT140_IDTight",
+//  };
+//
+//  for(auto const& selLabel : mettriggers){
+//    for(auto const& metLabel : labelMap_MET_){
+//      bookHistograms_MET(selLabel, metLabel.first, utils::mapKeys(metLabel.second));
+//    }
+//    bookHistograms_METMHT(selLabel);
+//  }
+//
+//  puintervals = {
+//  "PU0to20",
+//  "PU20to40",
+//  "PUgt40",
+//  "PU0to20_HLT",
+//  "PU20to40_HLT",
+//  "PUgt40_HLT",
+//  "PU0to20_HLT_TypeOne",
+//  "PU20to40_HLT_TypeOne",
+//  "PUgt40_HLT_TypeOne",
+//  };
+//
+//  for(auto const& selLabel : puintervals){
+//    for(auto const& metLabel : labelMap_MET_){
+//      bookHistograms_MET(selLabel, metLabel.first, utils::mapKeys(metLabel.second));
+//    }
+//  }
 
 }
 
@@ -187,6 +187,8 @@ void JMETriggerAnalysisDriverRun3::analyze(){
   float wgt = 1.f;
   H1("weight")->Fill(wgt);
 
+  bool IsoMu27 = value<bool>("HLT_IsoMu27");
+
   // AK4 Jets
   const float minAK4JetPt(30.);
   const float minAK4JetPtRef(20.);
@@ -194,6 +196,7 @@ void JMETriggerAnalysisDriverRun3::analyze(){
 
   // Single-Jet
   for(auto const& jetLabel : labelMap_jetAK4_){
+    if(not IsoMu27) continue;
     auto const isGENJets = (jetLabel.first.find("GenJets") != std::string::npos);
 
     auto const jetPt1 = isGENJets ? minAK4JetPtRef : minAK4JetPt;
@@ -209,35 +212,36 @@ void JMETriggerAnalysisDriverRun3::analyze(){
 
     fillHistograms_Jets("NoSelection", fhDataAK4Jets, wgt);
 
-    for(auto const& selLabel : jettriggers){
-      auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltJetTrigger(selLabel);
-      if(not hltTrig){
-        continue;
-      }
-      auto fhDataAK4JetsNew = fhDataAK4Jets;
-      for(auto& match : fhDataAK4JetsNew.matches){
-        if(match.label == "HLT" && selLabel == "HLT_PFJet140") match.jetPtMin = 140.;
-        else if(match.label == "HLT" && selLabel == "HLT_PFJet320") match.jetPtMin = 320.;
-        else if(match.label == "HLT" && selLabel == "HLT_PFJet500") match.jetPtMin = 500.;
-      }
+    //for(auto const& selLabel : jettriggers){
+    //  auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltJetTrigger(selLabel);
+    //  if(not hltTrig){
+    //    continue;
+    //  }
+    //  auto fhDataAK4JetsNew = fhDataAK4Jets;
+    //  for(auto& match : fhDataAK4JetsNew.matches){
+    //    if(match.label == "HLT" && selLabel == "HLT_PFJet140") match.jetPtMin = 140.;
+    //    else if(match.label == "HLT" && selLabel == "HLT_PFJet320") match.jetPtMin = 320.;
+    //    else if(match.label == "HLT" && selLabel == "HLT_PFJet500") match.jetPtMin = 500.;
+    //  }
 
-      fillHistograms_Jets(selLabel, fhDataAK4JetsNew, wgt);
-    }
+    //  fillHistograms_Jets(selLabel, fhDataAK4JetsNew, wgt);
+    //}
 
-    if(isGENJets) continue;
+    //if(isGENJets) continue;
 
-    for(auto const& selLabel : httriggers){
-      auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltHTTrigger(selLabel);
-      if(not hltTrig){
-        continue;
-      }
+    //for(auto const& selLabel : httriggers){
+    //  auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltHTTrigger(selLabel);
+    //  if(not hltTrig){
+    //    continue;
+    //  }
 
-      fillHistograms_Jets(selLabel, fhDataAK4Jets, wgt);
-    }
+    //  fillHistograms_Jets(selLabel, fhDataAK4Jets, wgt);
+    //}
   }
 
   // HT
   for(std::string const& jetType : {"PF", "PFPuppi"}){
+    if(not IsoMu27) continue;
 
     fillHistoDataJets fhDataHLTAK4Jets;
     fhDataHLTAK4Jets.jetCollection = "hltAK4"+jetType+"JetsCorrected";
@@ -256,15 +260,15 @@ void JMETriggerAnalysisDriverRun3::analyze(){
     fillHistoDataMET fhDataHLTHT;
     fhDataHLTHT.metCollection = "hlt"+jetType+"HT";
 
-    for(auto const& selLabel : httriggers){
-      auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltHTTrigger(selLabel);
-      if(not hltTrig){
-        continue;
-      }
+    //for(auto const& selLabel : httriggers){
+    //  auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltHTTrigger(selLabel);
+    //  if(not hltTrig){
+    //    continue;
+    //  }
 
-      fillHistograms_Jets_2DMaps(selLabel, fhDataHLTAK4Jets, fhDataOffAK4Jets, wgt);
+    //  fillHistograms_Jets_2DMaps(selLabel, fhDataHLTAK4Jets, fhDataOffAK4Jets, wgt);
 
-    }
+    //}
   }
 
   // AK8 Jets
@@ -273,6 +277,8 @@ void JMETriggerAnalysisDriverRun3::analyze(){
   const float maxAK8JetDeltaRmatchRef(0.2);
 
   for(auto const& jetLabel : labelMap_jetAK8_){
+    if(not IsoMu27) continue;
+
     auto const isGENJets = (jetLabel.first.find("GenJets") != std::string::npos);
 
     auto const jetPt1 = isGENJets ? minAK8JetPtRef : minAK8JetPt;
@@ -292,6 +298,8 @@ void JMETriggerAnalysisDriverRun3::analyze(){
 
   // MET
   for(auto const& metLabel : labelMap_MET_){
+    if(not IsoMu27) continue;
+
     fillHistoDataMET fhDataMET;
     fhDataMET.metCollection = metLabel.first;
     for(auto const& metRefs : metLabel.second){
@@ -300,30 +308,30 @@ void JMETriggerAnalysisDriverRun3::analyze(){
 
     fillHistograms_MET("NoSelection", fhDataMET, wgt);
 
-    for(auto const& selLabel : mettriggers){
-      auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltMETTrigger(selLabel);
-      if(hltTrig){
-        fillHistograms_MET(selLabel, fhDataMET, wgt);
-      }
-    }
+    //for(auto const& selLabel : mettriggers){
+    //  auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltMETTrigger(selLabel);
+    //  if(hltTrig){
+    //    fillHistograms_MET(selLabel, fhDataMET, wgt);
+    //  }
+    //}
 
-    for(auto const& selLabel : puintervals){
-      auto const puInt = hasTTreeReaderValue("pileupInfo_BX0_numPUInteractions") ? pileupintervals(selLabel) : false;
-      if(puInt){
-        fillHistograms_MET(selLabel, fhDataMET, wgt);
-      }
-    }
+    //for(auto const& selLabel : puintervals){
+    //  auto const puInt = hasTTreeReaderValue("pileupInfo_BX0_numPUInteractions") ? pileupintervals(selLabel) : false;
+    //  if(puInt){
+    //    fillHistograms_MET(selLabel, fhDataMET, wgt);
+    //  }
+    //}
   }
 
   // MET+MHT
-  fillHistograms_METMHT("NoSelection", wgt);
+  if(IsoMu27) fillHistograms_METMHT("NoSelection", wgt);
 
-  for(auto const& selLabel : mettriggers){
-    auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltMETTrigger(selLabel);
-    if(hltTrig){
-      fillHistograms_METMHT(selLabel, wgt);
-    }
-  }
+  //for(auto const& selLabel : mettriggers){
+  //  auto const hltTrig = hasTTreeReaderValue(selLabel) ? value<bool>(selLabel) : hltMETTrigger(selLabel);
+  //  if(hltTrig){
+  //    fillHistograms_METMHT(selLabel, wgt);
+  //  }
+  //}
 }
 
 bool JMETriggerAnalysisDriverRun3::hltJetTrigger(std::string const& key) const {

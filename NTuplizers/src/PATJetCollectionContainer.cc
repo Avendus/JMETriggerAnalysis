@@ -55,7 +55,31 @@ void PATJetCollectionContainer::reserve(const size_t vec_size) {
 }
 
 void PATJetCollectionContainer::emplace_back(const pat::Jet& obj) {
-  pt_.emplace_back(obj.pt());
+  double jet_pt = obj.pt();
+
+  if(obj.isPFJet()){
+    double NHF  = obj.neutralHadronEnergyFraction();
+    double NEMF = obj.neutralEmEnergyFraction();
+    double CHF  = obj.chargedHadronEnergyFraction();
+    double MUF  = obj.muonEnergyFraction();
+    double CEMF = obj.chargedEmEnergyFraction();
+    double NumConst = obj.chargedMultiplicity()+obj.neutralMultiplicity();
+    double NumNeutralParticles = obj.neutralMultiplicity();
+    double CHM  = obj.chargedMultiplicity();
+    bool jetid = false;
+    
+    if(abs(obj.eta()) <= 2.6 && CEMF<0.8 && CHM>0 && CHF>0 && NumConst>1 && NEMF<0.9 && MUF <0.8 && NHF < 0.9) jetid = true;
+
+    else if(abs(obj.eta()) > 2.6 && abs(obj.eta()) <= 2.7 && CEMF<0.8 && NEMF<0.99 && MUF <0.8 && NHF < 0.9) jetid = true;
+
+    else if(abs(obj.eta()) > 2.7 && abs(obj.eta()) <= 3.0 && NHF<0.9999) jetid = true;
+
+    else if(abs(obj.eta()) > 3.0 && abs(obj.eta()) <= 5.0 && NEMF<0.90 && NumNeutralParticles>10) jetid = true;
+
+    if(!jetid) jet_pt = 0;
+  }
+
+  pt_.emplace_back(jet_pt);
   eta_.emplace_back(obj.eta());
   phi_.emplace_back(obj.phi());
   mass_.emplace_back(obj.mass());
