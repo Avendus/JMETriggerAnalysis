@@ -68,14 +68,14 @@ void JMETriggerAnalysisDriverRun3::init(){
            {"offlPFCorr", "offlineAK8PFJetsCorrected"},
            {"hltPFPuppiCorr", "hltAK8PFPuppiJetsCorrected"},
            {"offlPFPuppiCorr", "offlineAK8PFPuppiJetsCorrected"}}},
-    {"hltAK8CaloJets"              , {{"GEN", "ak8GenJetsNoNu"}}},
-    {"hltAK8CaloJetsCorrected"     , {{"GEN", "ak8GenJetsNoNu"}}},
+    {"hltAK8CaloJets"              , {{"GEN", "ak8GenJetsNoNu"}, {"Offline", "offlineAK8PFPuppiJetsCorrected"}}},
+    {"hltAK8CaloJetsCorrected"     , {{"GEN", "ak8GenJetsNoNu"}, {"Offline", "offlineAK8PFPuppiJetsCorrected"}}},
     {"hltAK8PFClusterJets"         , {{"GEN", "ak8GenJetsNoNu"}}},
     {"hltAK8PFClusterJetsCorrected", {{"GEN", "ak8GenJetsNoNu"}}},
-    {"hltAK8PFJets"                , {{"GEN", "ak8GenJetsNoNu"}}},
-    {"hltAK8PFJetsCorrected"       , {{"GEN", "ak8GenJetsNoNu"}}},
-    {"hltAK8PFPuppiJets"           , {{"GEN", "ak8GenJetsNoNu"}}},
-    {"hltAK8PFPuppiJetsCorrected"  , {{"GEN", "ak8GenJetsNoNu"}}},
+    {"hltAK8PFJets"                , {{"GEN", "ak8GenJetsNoNu"}, {"Offline", "offlineAK8PFPuppiJetsCorrected"}}},
+    {"hltAK8PFJetsCorrected"       , {{"GEN", "ak8GenJetsNoNu"}, {"Offline", "offlineAK8PFPuppiJetsCorrected"}}},
+    {"hltAK8PFPuppiJets"           , {{"GEN", "ak8GenJetsNoNu"}, {"Offline", "offlineAK8PFPuppiJetsCorrected"}}},
+    {"hltAK8PFPuppiJetsCorrected"  , {{"GEN", "ak8GenJetsNoNu"}, {"Offline", "offlineAK8PFPuppiJetsCorrected"}}},
   };
 
   labelMap_MET_.clear();
