@@ -1,7 +1,7 @@
-This git repository was created to compare the online and offline of PFHC. It was forked from the run_13_0_X branch in cghuh's repository.
+This git repository was created to compare the online and offline of PFHC. It was forked from the run_13_0_X branch in cghuh's repository in 2023-September-13th
 
 - Installation:
-$ git clone https://github.com/Avendus/JMETriggerAnalysis.git -b run3_13_0_X
+$ git clone https://github.com/Avendus/JMETriggerAnalysis.git -b Comparison_OnOffline
 
 - EDAnalyzer
 PATH: JMETriggerAnalysis/PFHadronCalibration/plugins/PFHadCalibNTuple.cc
