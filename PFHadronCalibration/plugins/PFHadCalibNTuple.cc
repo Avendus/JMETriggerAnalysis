@@ -40,7 +40,9 @@ private:
   // input EDM collections
   edm::EDGetTokenT<reco::GenParticleCollection> const genPartsToken_;
   edm::EDGetTokenT<reco::PFSimParticleCollection> const pfSimPartsToken_;
+  edm::EDGetTokenT<reco::PFSimParticleCollection> const offline_pfSimPartsToken_;
   edm::EDGetTokenT<reco::PFCandidateCollection> const recoPFCandsToken_;
+  edm::EDGetTokenT<reco::PFCandidateCollection> const offline_recoPFCandsToken_; // JunghyunLee
 
   // status code of selected GEN particles
   int const genParticleStatus_;
@@ -80,6 +82,7 @@ private:
   TTree* ttree_ = nullptr;
 
   std::vector<float> true_energy_;
+  std::vector<float> gen_momentum_; ////// JunghyunLee
   std::vector<float> true_eta_;
   std::vector<float> true_phi_;
   std::vector<float> true_dr_;
@@ -97,6 +100,24 @@ private:
   std::vector<uint> pfc_trackRef_nValidPixelHits_;
   std::vector<uint> pfc_trackRef_nValidTrackerHits_;
 
+  std::vector<float> true_energy_offline_;
+  std::vector<float> true_eta_offline_;
+  std::vector<float> true_phi_offline_;
+  std::vector<float> true_dr_offline_;
+  std::vector<int> true_charge_offline_;
+  std::vector<float> pfc_ecal_offline_;
+  std::vector<float> pfc_hcal_offline_;
+  std::vector<float> pfc_eta_offline_;
+  std::vector<float> pfc_phi_offline_;
+  std::vector<float> pfc_charge_offline_;
+  std::vector<float> pfc_id_offline_;
+  std::vector<float> pfc_trackRef_p_offline_;
+  std::vector<float> pfc_trackRef_pt_offline_;
+  std::vector<float> pfc_trackRef_eta_offline_;
+  std::vector<float> pfc_trackRef_phi_offline_;
+  std::vector<float> pfc_trackRef_nValidPixelHits_offline_;
+  std::vector<float> pfc_trackRef_nValidTrackerHits_offline_;
+
   void reset_variables();
 };
 
@@ -105,7 +126,9 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
       ttreeName_(iConfig.getParameter<std::string>("TTreeName")),
       genPartsToken_(consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("genParticles"))),
       pfSimPartsToken_(consumes<reco::PFSimParticleCollection>(iConfig.getParameter<edm::InputTag>("pfSimParticles"))),
+      offline_pfSimPartsToken_(consumes<reco::PFSimParticleCollection>(iConfig.getParameter<edm::InputTag>("PFSimParticles"))),
       recoPFCandsToken_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("recoPFCandidates"))),
+      offline_recoPFCandsToken_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("PFCandidates"))), // JunghyunLee
       genParticleStatus_(iConfig.getParameter<int>("genParticleStatus")),
       genParticlePdgId_(iConfig.getParameter<int>("genParticlePdgId")),
       genParticleIsoMinDeltaR_(iConfig.getParameter<double>("genParticleIsoMinDeltaR")),
@@ -124,7 +147,7 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
     assert(maxEtaForMinTrkHitsCuts_[idx] < maxEtaForMinTrkHitsCuts_[idx + 1]);
   }
 
-  globalCounter_ = std::vector<uint>(13, 0);
+  globalCounter_ = std::vector<uint>(14, 0);
 
   usesResource(TFileService::kSharedResource);
 
@@ -140,6 +163,7 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
     throw edm::Exception(edm::errors::Configuration, "failed to create TTree via TFileService::make<TTree>");
   }
 
+  ttree_->Branch("gen_momentum", &gen_momentum_); ////// JunghyunLee
   ttree_->Branch("true_energy", &true_energy_);
   ttree_->Branch("true_eta", &true_eta_);
   ttree_->Branch("true_phi", &true_phi_);
@@ -157,6 +181,29 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
   ttree_->Branch("pfc_trackRef_phi", &pfc_trackRef_phi_);
   ttree_->Branch("pfc_trackRef_nValidPixelHits", &pfc_trackRef_nValidPixelHits_);
   ttree_->Branch("pfc_trackRef_nValidTrackerHits", &pfc_trackRef_nValidTrackerHits_);
+
+  ttree_->Branch("true_energy_offline", &true_energy_offline_);
+  ttree_->Branch("true_dr_offline", &true_dr_offline_);
+  ttree_->Branch("pfc_ecal_offline", &pfc_ecal_offline_);
+  ttree_->Branch("pfc_hcal_offline", &pfc_hcal_offline_);
+  ttree_->Branch("true_energy_offline", &true_energy_offline_);
+  ttree_->Branch("true_eta_offline", &true_eta_offline_);
+  ttree_->Branch("true_phi_offline", &true_phi_offline_);
+  ttree_->Branch("true_dr_offline", &true_dr_offline_);
+  ttree_->Branch("true_charge_offline", &true_charge_offline_);
+  ttree_->Branch("pfc_ecal_offline", &pfc_ecal_offline_);
+  ttree_->Branch("pfc_hcal_offline", &pfc_hcal_offline_);
+  ttree_->Branch("pfc_eta_offline", &pfc_eta_offline_);
+  ttree_->Branch("pfc_phi_offline", &pfc_phi_offline_);
+  ttree_->Branch("pfc_charge_offline", &pfc_charge_offline_);
+  ttree_->Branch("pfc_id_offline", &pfc_id_offline_);
+  ttree_->Branch("pfc_trackRef_p_offline", &pfc_trackRef_p_offline_);
+  ttree_->Branch("pfc_trackRef_pt_offline", &pfc_trackRef_pt_offline_);
+  ttree_->Branch("pfc_trackRef_eta_offline", &pfc_trackRef_eta_offline_);
+  ttree_->Branch("pfc_trackRef_phi_offline", &pfc_trackRef_phi_offline_);
+  ttree_->Branch("pfc_trackRef_nValidPixelHits_offline", &pfc_trackRef_nValidPixelHits_offline_);
+  ttree_->Branch("pfc_trackRef_nValidTrackerHits_offline", &pfc_trackRef_nValidTrackerHits_offline_);
+
 }
 
 PFHadCalibNTuple::~PFHadCalibNTuple() {
@@ -179,12 +226,15 @@ PFHadCalibNTuple::~PFHadCalibNTuple() {
   edm::LogPrint("") << " - with min nb of pixel hits: " << globalCounter_[10];
   edm::LogPrint("") << " - with min nb of pixel+strip hits: " << globalCounter_[11];
   edm::LogPrint("") << " - with E_ECAL < " << maxECalEnergy_ << " GeV: " << globalCounter_[12];
+  edm::LogPrint("") << " Pass both online & offline cuts: " << globalCounter_[13];
 }
 
 void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   auto const& genParts = iEvent.get(genPartsToken_);
   auto const& pfSimParts = iEvent.get(pfSimPartsToken_);
+  auto const& offline_pfSimParts = iEvent.get(offline_pfSimPartsToken_);
   auto const& recoPFCands = iEvent.get(recoPFCandsToken_);
+  auto const& offline_recoPFCands = iEvent.get(offline_recoPFCandsToken_);
 
   reset_variables();
 
@@ -235,6 +285,8 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           auto const phi = tpatecal.positionREP().Phi();
           auto const trueE = std::sqrt(tpatecal.momentum().Vect().Mag2());
           auto const true_dr = reco::deltaR(gen.momentum().Eta(), gen.momentum().Phi(), eta, phi);
+          ////auto const genE = std::sqrt(genParts.momentum().Vect().Mag2());
+          auto const genE = genp_i.energy();
 
           ++globalCounter_[3];
 
@@ -243,12 +295,48 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           true_phi_.emplace_back(phi);
           true_dr_.emplace_back(true_dr);
           true_charge_.emplace_back(ptc.charge());
-        }
+          gen_momentum_.emplace_back(genE);
+        } // End of [ pfSimParts ] roof
+        
+
+        for (auto const& offline_ptc : offline_pfSimParts){
+          if (offline_ptc.charge() >= 0)
+            continue;
+
+          auto const& offline_gen = offline_ptc.trajectoryPoint(reco::PFTrajectoryPoint::ClosestApproach);
+          auto const& offline_dR = reco::deltaR(genp_i.eta(), genp_i.phi(), offline_gen.momentum().Eta(), offline_gen.momentum().Phi());
+          if (offline_dR > 0.01)
+            continue;
+
+          auto const& offline_tpatecal = offline_ptc.extrapolatedPoint(reco::PFTrajectoryPoint::ECALEntrance);
+          if (not offline_tpatecal.isValid())
+            continue;
+
+          auto const offline_eta = offline_tpatecal.positionREP().Eta();
+          auto const offline_phi = offline_tpatecal.positionREP().Phi();
+          auto const offline_trueE = std::sqrt(offline_tpatecal.momentum().Vect().Mag2());
+          auto const offline_true_dr = reco::deltaR(offline_gen.momentum().Eta(), offline_gen.momentum().Phi(), offline_eta, offline_phi);
+
+          true_energy_offline_.emplace_back(offline_trueE);
+          true_eta_offline_.emplace_back(offline_eta);
+          true_phi_offline_.emplace_back(offline_phi);
+          true_dr_offline_.emplace_back(offline_true_dr);
+          true_charge_offline_.emplace_back(offline_ptc.charge());
+
+        } // End of [ offline_pfSimParts ] roof
+    
       }
     }
   }
 
   LogTrace("") << "----------------------------------------------------------";
+
+  ////if(recoPFCands.size() != offline_recoPFCands.size()){
+  ////    throw cms::Exception("SizeMismatch")
+  ////      << "Size of recoPFCands and offline_recoPFCands do not match!";
+  ////}
+  bool is_pass_cut_online = false;
+  bool is_pass_cut_offline = false;
 
   // Reco pion(pi-) selection
   for (auto const& pfc : recoPFCands) {
@@ -343,6 +431,9 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
       continue;
     ++globalCounter_[12];
 
+    // After cuts
+    is_pass_cut_online = true;
+
     pfc_ecal_.emplace_back(ecalRaw);
     pfc_hcal_.emplace_back(hcalRaw);
     pfc_eta_.emplace_back(pfc.eta());
@@ -355,13 +446,101 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     pfc_trackRef_phi_.emplace_back(track_phi);
     pfc_trackRef_nValidPixelHits_.emplace_back(track_nValidPixelHits);
     pfc_trackRef_nValidTrackerHits_.emplace_back(track_nValidTrackerHits);
-  }
+  } // End of Reco pion roof
 
+  // offline Reco pion(pi-) selection
+  for (auto const& pfc : offline_recoPFCands) {
+
+    if (pfc.particleId() != 1)
+      continue;
+
+    auto const offline_ecalRaw = pfc.rawEcalEnergy();
+    auto const offline_hcalRaw = pfc.rawHcalEnergy();
+    if ((offline_ecalRaw + offline_hcalRaw) < minCaloEnergy_)
+      continue;
+
+    auto nTracks = 0u;
+    auto const& theElements = pfc.elementsInBlocks();
+    if (theElements.empty()) {
+      if (not usePFBlockElements_)
+        nTracks = 1;  //!! hack for pfTICL (ref: https://github.com/cms-sw/cmssw/pull/32202)
+    } else {
+      auto const& elements = theElements[0].first->elements();
+      for (unsigned iEle = 0; iEle < elements.size(); ++iEle) {
+        if (elements[iEle].type() == reco::PFBlockElement::TRACK) {
+          ++nTracks;
+        }
+      }
+    }
+
+    auto trackRef = pfc.trackRef();
+
+    auto const track_p = trackRef->p();
+    auto const track_pt = trackRef->pt();
+    auto const track_eta = trackRef->eta();
+    auto const track_phi = trackRef->phi();
+
+    auto const& hp = trackRef->hitPattern();
+    uint const track_nValidPixelHits = hp.numberOfValidPixelHits();
+    uint const track_nValidTrackerHits = trackRef->numberOfValidHits();
+
+    if (pfc.pt() < minPt_)
+      continue;
+    if (nTracks != 1)
+      continue;
+    if (track_p < minTrackP_ or track_pt < minTrackPt_)
+      continue;
+
+
+    auto hasMinPixelHits = false;
+    auto hasMinTrackerHits = false;
+    for (uint ieta = 0; ieta < maxEtaForMinTrkHitsCuts_.size(); ++ieta) {
+      auto const etaMin = ieta ? maxEtaForMinTrkHitsCuts_[ieta - 1] : 0.;
+      auto const etaMax = maxEtaForMinTrkHitsCuts_[ieta];
+
+      if (std::abs(track_eta) >= etaMin and std::abs(track_eta) < etaMax) {
+        hasMinPixelHits = track_nValidPixelHits >= minPixelHits_[ieta];
+        hasMinTrackerHits = track_nValidTrackerHits >= minTrackerHits_[ieta];
+        break;
+      }
+    }
+
+    if (not hasMinPixelHits)
+      continue;
+
+    if (not hasMinTrackerHits)
+      continue;
+
+    if (offline_ecalRaw > maxECalEnergy_)
+      continue;
+
+    // After cuts
+    is_pass_cut_offline = true;
+
+    pfc_ecal_offline_.emplace_back(offline_ecalRaw);
+    pfc_hcal_offline_.emplace_back(offline_hcalRaw);
+    pfc_eta_offline_.emplace_back(pfc.eta());
+    pfc_phi_offline_.emplace_back(pfc.phi());
+    pfc_charge_offline_.emplace_back(pfc.charge());
+    pfc_id_offline_.emplace_back(pfc.particleId());
+    pfc_trackRef_p_offline_.emplace_back(track_p);
+    pfc_trackRef_pt_offline_.emplace_back(track_pt);
+    pfc_trackRef_eta_offline_.emplace_back(track_eta);
+    pfc_trackRef_phi_offline_.emplace_back(track_phi);
+    pfc_trackRef_nValidPixelHits_offline_.emplace_back(track_nValidPixelHits);
+    pfc_trackRef_nValidTrackerHits_offline_.emplace_back(track_nValidTrackerHits);
+
+
+  } // End of offline RECO roof
+
+  if(!(is_pass_cut_online && is_pass_cut_offline)) return;
+  ++globalCounter_[13];
   ttree_->Fill();
 }
 
 void PFHadCalibNTuple::reset_variables() {
   true_energy_.clear();
+  gen_momentum_.clear(); // JunghyunLee
   true_eta_.clear();
   true_phi_.clear();
   true_dr_.clear();
@@ -378,6 +557,27 @@ void PFHadCalibNTuple::reset_variables() {
   pfc_trackRef_phi_.clear();
   pfc_trackRef_nValidPixelHits_.clear();
   pfc_trackRef_nValidTrackerHits_.clear();
+
+  true_energy_offline_.clear();
+  true_eta_offline_.clear();
+  true_phi_offline_.clear();
+  true_dr_offline_.clear();
+  true_charge_offline_.clear();
+  pfc_ecal_offline_.clear();
+  pfc_hcal_offline_.clear();
+  pfc_ecal_offline_.clear();
+  pfc_hcal_offline_.clear();
+  pfc_eta_offline_.clear();
+  pfc_phi_offline_.clear();
+  pfc_charge_offline_.clear();
+  pfc_id_offline_.clear();
+  pfc_trackRef_p_offline_.clear();
+  pfc_trackRef_pt_offline_.clear();
+  pfc_trackRef_eta_offline_.clear();
+  pfc_trackRef_phi_offline_.clear();
+  pfc_trackRef_nValidPixelHits_offline_.clear();
+  pfc_trackRef_nValidTrackerHits_offline_.clear();
+
 }
 
 void PFHadCalibNTuple::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {

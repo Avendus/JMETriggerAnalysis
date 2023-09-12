@@ -4,10 +4,9 @@ from CRABClient.UserUtilities import config
 config = config()
 
 config.section_("General")
-config.General.requestName   = 'SinglePion_E_2to200_PFHadCalib_run3_2023'
-####config.General.requestName   = 'SinglePion_E_200to500_PFHadCalib_run3_2023'
-####config.General.transferLogs = False
-config.General.transferLogs = True
+####config.General.requestName   = 'SinglePion_E_2to200_PFHadCalib_run3_2023'
+config.General.requestName   = 'SinglePion_E_200to500_PFHadCalib_run3_2023'
+config.General.transferLogs = False
 config.General.workArea = 'SinglePion'
 
 config.section_("JobType")
@@ -27,10 +26,11 @@ config.section_("Data")
 #config.Data.inputDataset = ''
 ######config.Data.inputDataset = '/SinglePionGun_E0p2to200/Run3Winter23Digi-NoPUGTv4_126X_mcRun3_2023_forPU65_v4-v2/GEN-SIM-RAW'
 #config.Data.inputDataset = '/SinglePionGun_E200to500/Run3Winter23Digi-NoPUGTv4_126X_mcRun3_2023_forPU65_v4-v2/GEN-SIM-RAW'
-config.Data.inputDataset = '/SinglePionGun_E0p2to200/Run3Winter23Reco-NoPUGTv4_GTv4_126X_mcRun3_2023_forPU65_v4-v2/GEN-SIM-RECO' # Offline data-set
+####config.Data.inputDataset = '/SinglePionGun_E0p2to200/Run3Winter23Digi-NoPUGTv4_126X_mcRun3_2023_forPU65_v4-v2/GEN-SIM-RECO' # JunghyunLee Offline
+####config.Data.secondaryInputDataset = '/SinglePionGun_E0p2to200/Run3Winter23Digi-NoPUGTv4_126X_mcRun3_2023_forPU65_v4-v2/GEN-SIM-RAW'# JunghyunLee
+config.Data.inputDataset = '/SinglePionGun_E200to500/Run3Winter23Reco-NoPUGTv4_GTv4_126X_mcRun3_2023_forPU65_v4-v2/GEN-SIM-RECO' # JunghyunLee Offline
 # Offline data set is check at mattermost channel june 16 2023
-config.Data.secondaryInputDataset = '/SinglePionGun_E0p2to200/Run3Winter23Digi-NoPUGTv4_126X_mcRun3_2023_forPU65_v4-v2/GEN-SIM-RAW'# Online data-set
-# Online data-set is dauther of Offline data-set
+config.Data.secondaryInputDataset = '/SinglePionGun_E200to500/Run3Winter23Digi-NoPUGTv4_126X_mcRun3_2023_forPU65_v4-v2/GEN-SIM-RAW' # JunghyunLee
 
 config.Data.splitting = 'Automatic'
 config.Data.unitsPerJob = 180
@@ -41,8 +41,8 @@ config.Data.totalUnits = -1
 config.Data.publication = False
 #config.Data.allowNonValidInputDataset = True
 
-config.Data.outLFNDirBase = '/store/user/junghyun/PFHadCalib_2023/Sample/230908/SinglePionE_2_200_v6_run3_13_0_0'
-####config.Data.outLFNDirBase = '/store/user/junghyun/PFHadCalib_2023/Sample/230906/SinglePionE_200_500_run3_v6_13_0_0'
+####config.Data.outLFNDirBase = '/store/user/junghyun/PFHadCalib_2023/Sample/230906/SinglePionE_2_200_v6_run3_13_0_0'
+config.Data.outLFNDirBase = '/store/user/junghyun/PFHadCalib_2023/Sample/230908/SinglePionE_200_500_run3_v6_13_0_0'
 #config.Data.useParent = True
 #config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt'
 
