@@ -90,7 +90,7 @@ int main(){
 
   sTree->SetMakeClass(1);
  
-  sTree->SetBranchAddress("gen_momentum", &gen_energy_);
+  sTree->SetBranchAddress("gen_energy", &gen_energy_);
 
   sTree->SetBranchAddress("true_energy", &true_energy_);
   sTree->SetBranchAddress("true_eta", &true_eta_);
