@@ -38,11 +38,11 @@ private:
   std::string const ttreeName_;
 
   // input EDM collections
-  edm::EDGetTokenT<reco::GenParticleCollection> const genPartsToken_;
-  edm::EDGetTokenT<reco::PFSimParticleCollection> const pfSimPartsToken_;
-  edm::EDGetTokenT<reco::PFSimParticleCollection> const offline_pfSimPartsToken_;
-  edm::EDGetTokenT<reco::PFCandidateCollection> const recoPFCandsToken_;
-  edm::EDGetTokenT<reco::PFCandidateCollection> const offline_recoPFCandsToken_; // JunghyunLee
+  edm::EDGetTokenT<reco::GenParticleCollection> const genPartsToken_;// Gen Sim Particles
+  edm::EDGetTokenT<reco::PFSimParticleCollection> const pfSimPartsToken_; // Online Sim Particles [ online & offline's Sim Particles using same tag, So Idealy they are same ]
+  edm::EDGetTokenT<reco::PFSimParticleCollection> const offline_pfSimPartsToken_; // Offline Sim Particles [ online & offline's Sim Particles using same tag, So Idealy they are same ]
+  edm::EDGetTokenT<reco::PFCandidateCollection> const recoPFCandsToken_; // Online PF Candidates
+  edm::EDGetTokenT<reco::PFCandidateCollection> const offline_recoPFCandsToken_; // Offline PF Candidates
 
   // status code of selected GEN particles
   int const genParticleStatus_;
@@ -81,12 +81,17 @@ private:
 
   TTree* ttree_ = nullptr;
 
+  // Gen Sim Particles
+  std::vector<float> gen_energy_; 
+
+  // Online Sim Particles
   std::vector<float> true_energy_;
-  std::vector<float> gen_momentum_; ////// JunghyunLee
   std::vector<float> true_eta_;
   std::vector<float> true_phi_;
   std::vector<float> true_dr_;
   std::vector<int> true_charge_;
+
+  // Online PF Candidates
   std::vector<float> pfc_ecal_;
   std::vector<float> pfc_hcal_;
   std::vector<float> pfc_eta_;
@@ -100,11 +105,14 @@ private:
   std::vector<uint> pfc_trackRef_nValidPixelHits_;
   std::vector<uint> pfc_trackRef_nValidTrackerHits_;
 
+  // Offline Sim Particles
   std::vector<float> true_energy_offline_;
   std::vector<float> true_eta_offline_;
   std::vector<float> true_phi_offline_;
   std::vector<float> true_dr_offline_;
   std::vector<int> true_charge_offline_;
+
+  // Offline PF Candidates
   std::vector<float> pfc_ecal_offline_;
   std::vector<float> pfc_hcal_offline_;
   std::vector<float> pfc_eta_offline_;
@@ -119,16 +127,17 @@ private:
   std::vector<float> pfc_trackRef_nValidTrackerHits_offline_;
 
   void reset_variables();
+
 };
 
 PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
     : moduleLabel_(iConfig.getParameter<std::string>("@module_label")),
       ttreeName_(iConfig.getParameter<std::string>("TTreeName")),
-      genPartsToken_(consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("genParticles"))),
-      pfSimPartsToken_(consumes<reco::PFSimParticleCollection>(iConfig.getParameter<edm::InputTag>("pfSimParticles"))),
-      offline_pfSimPartsToken_(consumes<reco::PFSimParticleCollection>(iConfig.getParameter<edm::InputTag>("PFSimParticles"))),
-      recoPFCandsToken_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("recoPFCandidates"))),
-      offline_recoPFCandsToken_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("PFCandidates"))), // JunghyunLee
+      genPartsToken_(consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("genParticles"))), // Token for Gen Particles collection
+      pfSimPartsToken_(consumes<reco::PFSimParticleCollection>(iConfig.getParameter<edm::InputTag>("pfSimParticles"))), // Token for Online Sim Particles collection
+      offline_pfSimPartsToken_(consumes<reco::PFSimParticleCollection>(iConfig.getParameter<edm::InputTag>("PFSimParticles"))), // Token for Offline Sim Particles collection
+      recoPFCandsToken_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("recoPFCandidates"))), // Token for Online PF Candidates
+      offline_recoPFCandsToken_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("PFCandidates"))), // Token for Offline PF Candidates
       genParticleStatus_(iConfig.getParameter<int>("genParticleStatus")),
       genParticlePdgId_(iConfig.getParameter<int>("genParticlePdgId")),
       genParticleIsoMinDeltaR_(iConfig.getParameter<double>("genParticleIsoMinDeltaR")),
@@ -147,6 +156,7 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
     assert(maxEtaForMinTrkHitsCuts_[idx] < maxEtaForMinTrkHitsCuts_[idx + 1]);
   }
 
+  // Variable for counting event number which is passed each cut
   globalCounter_ = std::vector<uint>(14, 0);
 
   usesResource(TFileService::kSharedResource);
@@ -163,12 +173,17 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
     throw edm::Exception(edm::errors::Configuration, "failed to create TTree via TFileService::make<TTree>");
   }
 
-  ttree_->Branch("gen_momentum", &gen_momentum_); ////// JunghyunLee
+  // Branch for Gen Particles
+  ttree_->Branch("gen_energy", &gen_energy_);
+
+  // Branch for Online Sim Particles
   ttree_->Branch("true_energy", &true_energy_);
   ttree_->Branch("true_eta", &true_eta_);
   ttree_->Branch("true_phi", &true_phi_);
   ttree_->Branch("true_dr", &true_dr_);
   ttree_->Branch("true_charge", &true_charge_);
+
+  // Branch for Online PF Candidates
   ttree_->Branch("pfc_ecal", &pfc_ecal_);
   ttree_->Branch("pfc_hcal", &pfc_hcal_);
   ttree_->Branch("pfc_eta", &pfc_eta_);
@@ -182,6 +197,7 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
   ttree_->Branch("pfc_trackRef_nValidPixelHits", &pfc_trackRef_nValidPixelHits_);
   ttree_->Branch("pfc_trackRef_nValidTrackerHits", &pfc_trackRef_nValidTrackerHits_);
 
+  // Branch for Offline Sim Particles
   ttree_->Branch("true_energy_offline", &true_energy_offline_);
   ttree_->Branch("true_dr_offline", &true_dr_offline_);
   ttree_->Branch("pfc_ecal_offline", &pfc_ecal_offline_);
@@ -191,6 +207,8 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
   ttree_->Branch("true_phi_offline", &true_phi_offline_);
   ttree_->Branch("true_dr_offline", &true_dr_offline_);
   ttree_->Branch("true_charge_offline", &true_charge_offline_);
+
+  // Branch for Offline PF Candidates
   ttree_->Branch("pfc_ecal_offline", &pfc_ecal_offline_);
   ttree_->Branch("pfc_hcal_offline", &pfc_hcal_offline_);
   ttree_->Branch("pfc_eta_offline", &pfc_eta_offline_);
@@ -260,6 +278,7 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
             mindR = dR;
         }
       }
+      // End of roof for calculating minimum dR
 
       // Isolated GEN particle
       if (mindR > genParticleIsoMinDeltaR_) {
@@ -285,7 +304,7 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           auto const phi = tpatecal.positionREP().Phi();
           auto const trueE = std::sqrt(tpatecal.momentum().Vect().Mag2());
           auto const true_dr = reco::deltaR(gen.momentum().Eta(), gen.momentum().Phi(), eta, phi);
-          ////auto const genE = std::sqrt(genParts.momentum().Vect().Mag2());
+          //auto const genE = std::sqrt(genp_i.momentum().Vect().Mag2());
           auto const genE = genp_i.energy();
 
           ++globalCounter_[3];
@@ -295,8 +314,9 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           true_phi_.emplace_back(phi);
           true_dr_.emplace_back(true_dr);
           true_charge_.emplace_back(ptc.charge());
-          gen_momentum_.emplace_back(genE);
-        } // End of [ pfSimParts ] roof
+          gen_energy_.emplace_back(genE);
+        } 
+	// End of [ pfSimParts ] roof : roof for Online PF Sim Particles 
         
 
         for (auto const& offline_ptc : offline_pfSimParts){
@@ -323,22 +343,24 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           true_dr_offline_.emplace_back(offline_true_dr);
           true_charge_offline_.emplace_back(offline_ptc.charge());
 
-        } // End of [ offline_pfSimParts ] roof
-    
+        } 
+	// End of [ offline_pfSimParts ] roof : roof for Offline PF Sim Particles
       }
+      // End of [ mindR > genParticleIsoMinDeltaR_) ] if statement : if statement for selecting Isolated GEN particle
     }
+    // End of [ genp_i.status() == genParticleStatus_ and genp_i.pdgId() == genParticlePdgId_ ] if statement
+    // : if statement for selecting GEN and true(simPF) particle
   }
+  // End of Gen Particles roof
 
   LogTrace("") << "----------------------------------------------------------";
 
-  ////if(recoPFCands.size() != offline_recoPFCands.size()){
-  ////    throw cms::Exception("SizeMismatch")
-  ////      << "Size of recoPFCands and offline_recoPFCands do not match!";
-  ////}
+
   bool is_pass_cut_online = false;
   bool is_pass_cut_offline = false;
 
-  // Reco pion(pi-) selection
+
+  // roof for Online PF Candidates: Reconstructed pion(pi-) selection
   for (auto const& pfc : recoPFCands) {
     ++globalCounter_[4];
 
@@ -431,7 +453,7 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
       continue;
     ++globalCounter_[12];
 
-    // After cuts
+    // After Online cuts
     is_pass_cut_online = true;
 
     pfc_ecal_.emplace_back(ecalRaw);
@@ -446,9 +468,11 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     pfc_trackRef_phi_.emplace_back(track_phi);
     pfc_trackRef_nValidPixelHits_.emplace_back(track_nValidPixelHits);
     pfc_trackRef_nValidTrackerHits_.emplace_back(track_nValidTrackerHits);
-  } // End of Reco pion roof
+  } 
+  // End of Online PF Candidates roof
 
-  // offline Reco pion(pi-) selection
+
+  // roof for Offline PF Candidates: Reconstructed pion(pi-) selection
   for (auto const& pfc : offline_recoPFCands) {
 
     if (pfc.particleId() != 1)
@@ -514,7 +538,7 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     if (offline_ecalRaw > maxECalEnergy_)
       continue;
 
-    // After cuts
+    // After Offline cuts (Offline cuts are same condition to Online. Only differences is offline just use Offline PF Candidates)
     is_pass_cut_offline = true;
 
     pfc_ecal_offline_.emplace_back(offline_ecalRaw);
@@ -530,21 +554,29 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     pfc_trackRef_nValidPixelHits_offline_.emplace_back(track_nValidPixelHits);
     pfc_trackRef_nValidTrackerHits_offline_.emplace_back(track_nValidTrackerHits);
 
-
-  } // End of offline RECO roof
-
+  } 
+  // End of Online PF Candidates roof
+ 
   if(!(is_pass_cut_online && is_pass_cut_offline)) return;
+  // Event which pass both Online & Offine cuts,
+  // will be filled at ntuple
   ++globalCounter_[13];
   ttree_->Fill();
 }
 
 void PFHadCalibNTuple::reset_variables() {
+  
+  // Gen Particles
+  gen_energy_.clear();
+
+  // Online Sim Particles
   true_energy_.clear();
-  gen_momentum_.clear(); // JunghyunLee
   true_eta_.clear();
   true_phi_.clear();
   true_dr_.clear();
   true_charge_.clear();
+
+  // Online PF Candidates
   pfc_ecal_.clear();
   pfc_hcal_.clear();
   pfc_eta_.clear();
@@ -558,11 +590,14 @@ void PFHadCalibNTuple::reset_variables() {
   pfc_trackRef_nValidPixelHits_.clear();
   pfc_trackRef_nValidTrackerHits_.clear();
 
+  // Offline Sim Particles
   true_energy_offline_.clear();
   true_eta_offline_.clear();
   true_phi_offline_.clear();
   true_dr_offline_.clear();
   true_charge_offline_.clear();
+
+  // Offline PF Candidates
   pfc_ecal_offline_.clear();
   pfc_hcal_offline_.clear();
   pfc_ecal_offline_.clear();
