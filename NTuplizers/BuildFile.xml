@@ -1,0 +1,12 @@
+<use name="FWCore/Common"/>
+<use name="FWCore/Framework"/>
+<use name="FWCore/MessageLogger"/>
+<use name="CommonTools/Utils"/>
+<use name="DataFormats/VertexReco"/>
+<use name="DataFormats/ParticleFlowCandidate"/>
+<use name="DataFormats/PatCandidates"/>
+<use name="DataFormats/JetReco"/>
+<use name="DataFormats/METReco"/>
+<export>
+  <lib name="1"/>
+</export>
