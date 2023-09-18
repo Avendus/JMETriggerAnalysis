@@ -41,7 +41,7 @@ config.Data.totalUnits = -1
 config.Data.publication = False
 #config.Data.allowNonValidInputDataset = True
 
-config.Data.outLFNDirBase = '/store/user/junghyun/PFHadCalib_2023/Sample/230908/SinglePionE_2_200_v6_run3_13_0_0'
+config.Data.outLFNDirBase = '/store/user/junghyun/PFHadCalib_2023/Sample/230919/SinglePionE_2_200_v6_run3_13_0_0'
 ####config.Data.outLFNDirBase = '/store/user/junghyun/PFHadCalib_2023/Sample/230906/SinglePionE_200_500_run3_v6_13_0_0'
 #config.Data.useParent = True
 #config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt'

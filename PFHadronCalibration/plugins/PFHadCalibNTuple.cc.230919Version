@@ -133,9 +133,19 @@ private:
   int Online_pfc_size_;
   int Offline_pfc_size_;
   int diff_pfc_size_;
-  int Online_pfc_selected_number_;
-  std::vector<float> pfc_mindR_OnOffline_;
-  std::vector<int> pfc_mindR_index_;
+
+  std::vector<float> pfc_ecal_diff_;
+  std::vector<float> pfc_hcal_diff_;
+  std::vector<float> pfc_eta_diff_;
+  std::vector<float> pfc_phi_diff_;
+  std::vector<float> pfc_charge_diff_;
+  std::vector<float> pfc_id_diff_;
+  std::vector<float> pfc_trackRef_p_diff_;
+  std::vector<float> pfc_trackRef_pt_diff_;
+  std::vector<float> pfc_trackRef_eta_diff_;
+  std::vector<float> pfc_trackRef_phi_diff_;
+  std::vector<float> pfc_trackRef_nValidPixelHits_diff_;
+  std::vector<float> pfc_trackRef_nValidTrackerHits_diff_;
 
   void reset_variables();
 
@@ -234,13 +244,22 @@ PFHadCalibNTuple::PFHadCalibNTuple(const edm::ParameterSet& iConfig)
   ttree_->Branch("pfc_trackRef_phi_offline", &pfc_trackRef_phi_offline_);
   ttree_->Branch("pfc_trackRef_nValidPixelHits_offline", &pfc_trackRef_nValidPixelHits_offline_);
   ttree_->Branch("pfc_trackRef_nValidTrackerHits_offline", &pfc_trackRef_nValidTrackerHits_offline_);
-
   ttree_->Branch("Online_pfc_size", &Online_pfc_size_);
   ttree_->Branch("Offline_pfc_size", &Offline_pfc_size_);
   ttree_->Branch("diff_pfc_size", &diff_pfc_size_);
-  ttree_->Branch("Online_pfc_selected_number", &Online_pfc_selected_number_);
-  ttree_->Branch("pfc_mindR_OnOffline", &pfc_mindR_OnOffline_);
-  ttree_->Branch("pfc_mindR_index", &pfc_mindR_index_);
+
+  ttree_->Branch("pfc_ecal_diff", &pfc_ecal_diff_);
+  ttree_->Branch("pfc_hcal_diff", &pfc_hcal_diff_);
+  ttree_->Branch("pfc_eta_diff", &pfc_eta_diff_);
+  ttree_->Branch("pfc_phi_diff", &pfc_phi_diff_);
+  ttree_->Branch("pfc_charge_diff", &pfc_charge_diff_);
+  ttree_->Branch("pfc_id_diff", &pfc_id_diff_);
+  ttree_->Branch("pfc_trackRef_p_diff", &pfc_trackRef_p_diff_);
+  ttree_->Branch("pfc_trackRef_pt_diff", &pfc_trackRef_pt_diff_);
+  ttree_->Branch("pfc_trackRef_eta_diff", &pfc_trackRef_eta_diff_);
+  ttree_->Branch("pfc_trackRef_phi_diff", &pfc_trackRef_phi_diff_);
+  ttree_->Branch("pfc_trackRef_nValidPixelHits_diff", &pfc_trackRef_nValidPixelHits_diff_);
+  ttree_->Branch("pfc_trackRef_nValidTrackerHits_diff", &pfc_trackRef_nValidTrackerHits_diff_);
 
 }  
 
@@ -264,6 +283,7 @@ PFHadCalibNTuple::~PFHadCalibNTuple() {
   edm::LogPrint("") << " - with min nb of pixel hits: " << globalCounter_[10];
   edm::LogPrint("") << " - with min nb of pixel+strip hits: " << globalCounter_[11];
   edm::LogPrint("") << " - with E_ECAL < " << maxECalEnergy_ << " GeV: " << globalCounter_[12];
+  edm::LogPrint("") << " Pass both online & offline cuts: " << globalCounter_[13];
 }
 
 void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -302,7 +322,7 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
             mindR = dR;
         }
       }
-      // End of loop for calculating minimum dR
+      // End of roof for calculating minimum dR
 
       // Isolated GEN particle
       if (mindR > genParticleIsoMinDeltaR_) {
@@ -344,23 +364,23 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           true_charge_.emplace_back(ptc.charge());
           gen_energy_.emplace_back(genE);
         } 
-	// End of [ pfSimParts ] loop : loop for Online PF Sim Particles 
+	// End of [ pfSimParts ] roof : roof for Online PF Sim Particles 
         
 
         for (auto const& offline_ptc : offline_pfSimParts){
-          if (offline_ptc.charge() >= 0)
-            continue;
+          ////if (offline_ptc.charge() >= 0)
+          ////  continue;
 
           auto const& offline_gen = offline_ptc.trajectoryPoint(reco::PFTrajectoryPoint::ClosestApproach);
           auto const& offline_dR = reco::deltaR(genp_i.eta(), genp_i.phi(), offline_gen.momentum().Eta(), offline_gen.momentum().Phi());
-          if (offline_dR > 0.01)
-            continue;
+          //if (offline_dR > 0.01)
+            ////continue;
           //  Is_Offline_Single_pfc_pass_cuts[2] = false;
           //else Is_Offline_Single_pfc_pass_cuts[2] = true;
 
           auto const& offline_tpatecal = offline_ptc.extrapolatedPoint(reco::PFTrajectoryPoint::ECALEntrance);
-          if (not offline_tpatecal.isValid())
-            continue;
+          //if (not offline_tpatecal.isValid())
+          ////  continue;
           //Is_Offline_Single_pfc_pass_cuts[3] = false;
           //else Is_Offline_Single_pfc_pass_cuts[3] = true;
 
@@ -376,14 +396,14 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           true_charge_offline_.emplace_back(offline_ptc.charge());
 
         } 
-	// End of [ offline_pfSimParts ] loop : loop for Offline PF Sim Particles
+	// End of [ offline_pfSimParts ] roof : roof for Offline PF Sim Particles
       }
       // End of [ mindR > genParticleIsoMinDeltaR_) ] if statement : if statement for selecting Isolated GEN particle
     }
     // End of [ genp_i.status() == genParticleStatus_ and genp_i.pdgId() == genParticlePdgId_ ] if statement
     // : if statement for selecting GEN and true(simPF) particle
   }
-  // End of Gen Particles loop
+  // End of Gen Particles roof
 
   LogTrace("") << "----------------------------------------------------------";
 
@@ -392,19 +412,19 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   ////bool is_pass_cut_offline = false;
 
 
-  // loop for Online PF Candidates: Reconstructed pion(pi-) selection
+  // roof for Online PF Candidates: Reconstructed pion(pi-) selection
   
   Online_pfc_size_ = static_cast<int>(recoPFCands.size());
   Offline_pfc_size_ = static_cast<int>(offline_recoPFCands.size());
   diff_pfc_size_ = Online_pfc_size_ - Offline_pfc_size_;
 
-  int NofSelected_online_pfc = 0;
-  for (auto const& pfc : recoPFCands) {
-  ////for (size_t i = 0; i < recoPFCands.size(); i++) {
+  //for (auto const& pfc : recoPFCands) {
+  for (size_t i = 0; i < recoPFCands.size(); i++) {
 
-    ////if( static_cast<int>(i) >= Offline_pfc_size_ ) continue;
+    if( static_cast<int>(i) >= Offline_pfc_size_ ) continue;
 
-    ////const auto& pfc = recoPFCands[i];
+    const auto& pfc = recoPFCands[i];
+    const auto& offline_pfc = offline_recoPFCands[i];
 
     ++globalCounter_[4];
     Is_Online_Single_pfc_pass_cuts[4] = true;
@@ -416,6 +436,10 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
 
     auto const ecalRaw = pfc.rawEcalEnergy();
     auto const hcalRaw = pfc.rawHcalEnergy();
+    auto const ecalRaw_offline = offline_pfc.rawEcalEnergy();
+    auto const hcalRaw_offline = offline_pfc.rawHcalEnergy();
+    auto ecalRaw_diff = ecalRaw - ecalRaw_offline;
+    auto hcalRaw_diff = hcalRaw - hcalRaw_offline;
 
     if ((ecalRaw + hcalRaw) < minCaloEnergy_)
       continue;
@@ -437,16 +461,42 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     }
 
     auto trackRef = pfc.trackRef();
+    auto trackRef_offline = offline_pfc.trackRef();
 
     auto const track_p = trackRef->p();
     auto const track_pt = trackRef->pt();
     auto const track_eta = trackRef->eta();
     auto const track_phi = trackRef->phi();
 
+    float track_p_offline = -50000.0;
+    float track_pt_offline = -50000.0;
+    float track_eta_offline = -50000.0;
+    float track_phi_offline = -50000.0;
+    if(trackRef_offline.isNonnull()){
+        track_p_offline = trackRef_offline->p();
+        track_pt_offline = trackRef_offline->pt();
+        track_eta_offline = trackRef_offline->eta();
+        track_phi_offline = trackRef_offline->phi();
+    }
+    auto track_p_diff = track_p - track_p_offline;
+    auto track_pt_diff = track_pt - track_pt_offline;
+    auto track_eta_diff = track_eta - track_eta_offline;
+    auto track_phi_diff = track_phi - track_phi_offline;
+
+
     auto const& hp = trackRef->hitPattern();
     uint const track_nValidPixelHits = hp.numberOfValidPixelHits();
     uint const track_nValidTrackerHits = trackRef->numberOfValidHits();
 
+    uint track_nValidPixelHits_offline = 1000;
+    uint track_nValidTrackerHits_offline = 1000;
+    if(trackRef_offline.isNonnull()){
+        auto const& hp_offline = trackRef_offline->hitPattern();
+        track_nValidPixelHits_offline = hp_offline.numberOfValidPixelHits();
+        track_nValidTrackerHits_offline = trackRef_offline->numberOfValidHits();
+    }
+    uint track_nValidPixelHits_diff = track_nValidPixelHits - track_nValidPixelHits_offline;
+    uint track_nValidTrackerHits_diff = track_nValidTrackerHits - track_nValidTrackerHits_offline;
 
     LogTrace("") << "----------------------------------------------------------";
     LogTrace("") << moduleLabel_ << " trackRef:";
@@ -525,71 +575,77 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     pfc_trackRef_nValidTrackerHits_.emplace_back(track_nValidTrackerHits);
     Is_Online_pfc_pass_cuts_.emplace_back(Is_Online_Single_pfc_pass_cuts);
 
-    NofSelected_online_pfc++;
+    pfc_ecal_offline_.emplace_back(ecalRaw_offline);
+    pfc_hcal_offline_.emplace_back(hcalRaw_offline);
+    pfc_eta_offline_.emplace_back(offline_pfc.eta());
+    pfc_phi_offline_.emplace_back(offline_pfc.phi());
+    pfc_charge_offline_.emplace_back(offline_pfc.charge());
+    pfc_id_offline_.emplace_back(offline_pfc.particleId());
+    pfc_trackRef_p_offline_.emplace_back(track_p_offline);
+    pfc_trackRef_pt_offline_.emplace_back(track_pt_offline);
+    pfc_trackRef_eta_offline_.emplace_back(track_eta_offline);
+    pfc_trackRef_phi_offline_.emplace_back(track_phi_offline);
+    pfc_trackRef_nValidPixelHits_offline_.emplace_back(track_nValidPixelHits_offline);
+    pfc_trackRef_nValidTrackerHits_offline_.emplace_back(track_nValidTrackerHits_offline);
+
+
+    auto eta_diff = pfc.eta() - offline_pfc.eta();
+    auto phi_diff = pfc.phi() - offline_pfc.phi();
+    auto charge_diff = pfc.charge() - offline_pfc.charge();
+    auto pfc_id_diff = pfc.particleId() - offline_pfc.particleId();
+    pfc_ecal_diff_.emplace_back(ecalRaw_diff);
+    pfc_hcal_diff_.emplace_back(hcalRaw_diff);
+    pfc_eta_diff_.emplace_back(eta_diff);
+    pfc_phi_diff_.emplace_back(phi_diff);
+    pfc_charge_diff_.emplace_back(charge_diff);
+    pfc_id_diff_.emplace_back(pfc_id_diff);
+    pfc_trackRef_p_diff_.emplace_back(track_p_diff);
+    pfc_trackRef_pt_diff_.emplace_back(track_pt_diff);
+    pfc_trackRef_eta_diff_.emplace_back(track_eta_diff);
+    pfc_trackRef_phi_diff_.emplace_back(track_phi_diff);
+    pfc_trackRef_nValidPixelHits_diff_.emplace_back(track_nValidPixelHits_diff);
+    pfc_trackRef_nValidTrackerHits_diff_.emplace_back(track_nValidTrackerHits_diff);
+
   } 
-  // End of Online PF Candidates loop
-  Online_pfc_selected_number_ = NofSelected_online_pfc;
+  // End of Online PF Candidates roof
+
 //////////////////////////////////////////////////////////////////////////////
+/*
+  // roof for Offline PF Candidates: Reconstructed pion(pi-) selection
+  for (auto const& pfc : offline_recoPFCands) {
+    //Is_Offline_Single_pfc_pass_cuts[4] = true;
 
-  // loop for finding On/Offline dR (only selected online)
-  for ( size_t i = 0; i < pfc_eta_.size(); i++){
-
-      float online_eta = -50000.0, offline_eta = -45000.0;
-      float online_phi = -50000.0, offline_phi = -45000.0;
-      float dr_OnOffline = 10000.0;
-      float mindR = 99999.9; int mindR_index = -1000.0;
-
-      int iterIndex = -1;
-      for (auto const& pfc : offline_recoPFCands) {
-          iterIndex++;
-          online_eta = pfc_eta_[i];
-          online_phi = pfc_phi_[i];
-          offline_eta = pfc.eta();
-          offline_phi = pfc.phi();
-
-          dr_OnOffline = reco::deltaR(online_eta, online_phi, offline_eta, offline_phi);
-          if ( dr_OnOffline < mindR ) {
-              mindR = dr_OnOffline;
-              mindR_index = iterIndex;
-          }
-
-      }
-      // End of offline PFCandidates loop
-
-      pfc_mindR_OnOffline_.emplace_back(mindR);
-      pfc_mindR_index_.emplace_back(mindR_index);
-  }
-
-  // loop for Offline PF Candidates: Reconstructed pion(pi-) selection
-  for (int i = 0; i < static_cast<int>(offline_recoPFCands.size()); i++) {
-  ////for (auto const& pfc : offline_recoPFCands) {
-
-    if (std::find(pfc_mindR_index_.begin(), pfc_mindR_index_.end(), i) == pfc_mindR_index_.end()) {
-        // i was not found in the vector
-        continue;
-    }
-    // Thanks to this if statement, offline pfc is matched to online pfc
-
-    if(pfc_eta_.size() != pfc_phi_.size()){
-        if(static_cast<int>(pfc_eta_.size()) != NofSelected_online_pfc){
-            LogTrace("") << "ERROR: Selected online pfc's eta & phi's size must be same";
-            LogTrace("") << "ERROR: And also their size have to be same with Selected online pfc number";
-            LogTrace("") << "ERROR: But they are not..";
-            LogTrace("") << "ERROR: Please check these problem";
-            exit(559);
-        }
-    }
-
-    const auto& pfc = offline_recoPFCands[i];
+    ////if (pfc.particleId() != 1)
+      ////continue;
+    //Is_Offline_Single_pfc_pass_cuts[5] = false;
+    //else Is_Offline_Single_pfc_pass_cuts[5] = true;
 
     auto const offline_ecalRaw = pfc.rawEcalEnergy();
     auto const offline_hcalRaw = pfc.rawHcalEnergy();
+    ////if ((offline_ecalRaw + offline_hcalRaw) < minCaloEnergy_)
+      ////continue;
+
+    ////auto nTracks = 0u;
+    ////auto const& theElements = pfc.elementsInBlocks();
+    ////if (theElements.empty()) {
+    ////  if (not usePFBlockElements_)
+    ////    nTracks = 1;  //!! hack for pfTICL (ref: https://github.com/cms-sw/cmssw/pull/32202)
+    ////} else {
+    ////  auto const& elements = theElements[0].first->elements();
+    ////  for (unsigned iEle = 0; iEle < elements.size(); ++iEle) {
+    ////    if (elements[iEle].type() == reco::PFBlockElement::TRACK) {
+    ////      ++nTracks;
+    ////    }
+    ////  }
+    ////}
 
     auto trackRef = pfc.trackRef();
-    float track_p = -50000.0;
-    float track_pt = -50000.0;
-    float track_eta = -50000.0;
-    float track_phi = -50000.0;
+
+    float track_p = 34.0;
+    float track_pt = 200.;
+    float track_eta = 3.1;
+    float track_phi = 3.1;
+
     if (trackRef.isNonnull() && trackRef.isAvailable()) {
      track_p = trackRef->p();
      track_pt = trackRef->pt();
@@ -597,18 +653,55 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
      track_phi = trackRef->phi();
     }
 
-    uint track_nValidPixelHits = 1000;
-    uint track_nValidTrackerHits = 1000;
-    if(trackRef.isNonnull()){
-        auto const& hp = trackRef->hitPattern();
-        track_nValidPixelHits = hp.numberOfValidPixelHits();
-        track_nValidTrackerHits = trackRef->numberOfValidHits();
-    }
-    ////uint track_nValidPixelHits_diff = track_nValidPixelHits - track_nValidPixelHits;
-    ////uint track_nValidTrackerHits_diff = track_nValidTrackerHits - track_nValidTrackerHits;
+    //auto const& hp = trackRef->hitPattern();
+    //uint const track_nValidPixelHits = hp.numberOfValidPixelHits();
+    //uint const track_nValidTrackerHits = trackRef->numberOfValidHits();
+
+    //if (pfc.pt() < minPt_)
+      ////continue;
+    //Is_Offline_Single_pfc_pass_cuts[6] = false;
+    //else Is_Offline_Single_pfc_pass_cuts[6] = true;
+    //if (nTracks != 1)
+    //  ////continue;
+    //Is_Offline_Single_pfc_pass_cuts[8] = false;
+    //else Is_Offline_Single_pfc_pass_cuts[8] = true;
+    //if (track_p < minTrackP_ or track_pt < minTrackPt_)
+    //  ////continue;
+    //Is_Offline_Single_pfc_pass_cuts[9] = false;
+    //else Is_Offline_Single_pfc_pass_cuts[9] = true;
+
+
+    ////auto hasMinPixelHits = false;
+    ////auto hasMinTrackerHits = false;
+    ////for (uint ieta = 0; ieta < maxEtaForMinTrkHitsCuts_.size(); ++ieta) {
+    ////  auto const etaMin = ieta ? maxEtaForMinTrkHitsCuts_[ieta - 1] : 0.;
+    ////  auto const etaMax = maxEtaForMinTrkHitsCuts_[ieta];
+
+    ////  if (std::abs(track_eta) >= etaMin and std::abs(track_eta) < etaMax) {
+    ////    hasMinPixelHits = track_nValidPixelHits >= minPixelHits_[ieta];
+    ////    hasMinTrackerHits = track_nValidTrackerHits >= minTrackerHits_[ieta];
+    ////    break;
+    ////  }
+    ////}
+
+    ////if (not hasMinPixelHits)
+    ////  ////continue;
+    ////Is_Offline_Single_pfc_pass_cuts[10] = false;
+    ////else Is_Offline_Single_pfc_pass_cuts[10] = true;
+
+    ////if (not hasMinTrackerHits)
+    ////  ////continue;
+    ////Is_Offline_Single_pfc_pass_cuts[11] = false;
+    ////else Is_Offline_Single_pfc_pass_cuts[11] = true;
+
+    ////if (offline_ecalRaw > maxECalEnergy_)
+    ////  ////continue;
+    ////Is_Offline_Single_pfc_pass_cuts[12] = false;
+    ////else Is_Offline_Single_pfc_pass_cuts[12] = true;
 
     // After Offline cuts (Offline cuts are same condition to Online. Only differences is offline just use Offline PF Candidates)
     ////is_pass_cut_offline = true;
+
     pfc_ecal_offline_.emplace_back(offline_ecalRaw);
     pfc_hcal_offline_.emplace_back(offline_hcalRaw);
     pfc_eta_offline_.emplace_back(pfc.eta());
@@ -616,20 +709,25 @@ void PFHadCalibNTuple::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     pfc_charge_offline_.emplace_back(pfc.charge());
     pfc_id_offline_.emplace_back(pfc.particleId());
 
+
     pfc_trackRef_p_offline_.emplace_back(track_p);
     pfc_trackRef_pt_offline_.emplace_back(track_pt);
     pfc_trackRef_eta_offline_.emplace_back(track_eta);
     pfc_trackRef_phi_offline_.emplace_back(track_phi);
-    pfc_trackRef_nValidPixelHits_offline_.emplace_back(track_nValidPixelHits);
-    pfc_trackRef_nValidTrackerHits_offline_.emplace_back(track_nValidTrackerHits);
+    //pfc_trackRef_nValidPixelHits_offline_.emplace_back(track_nValidPixelHits);
+    //pfc_trackRef_nValidTrackerHits_offline_.emplace_back(track_nValidTrackerHits);
 
     ////Is_Offline_pfc_pass_cuts_.emplace_back(Is_Offline_Single_pfc_pass_cuts);
   } 
-  // End of Online PF Candidates loop
+  // End of Online PF Candidates roof
 
-
+*/
 /////////////////////////////////////////////////////////////////////////////
 
+  ////if(!(is_pass_cut_online && is_pass_cut_offline)) return;
+  ////// Event which pass both Online & Offine cuts,
+  ////// will be filled at ntuple
+  ////++globalCounter_[13];
  
   ttree_->Fill();
 }
@@ -690,9 +788,19 @@ void PFHadCalibNTuple::reset_variables() {
   Online_pfc_size_ = 0;
   Offline_pfc_size_ = 0;
   diff_pfc_size_ = 0;
-  Online_pfc_selected_number_ = 0;
-  pfc_mindR_OnOffline_.clear();
-  pfc_mindR_index_.clear();
+
+  pfc_ecal_diff_.clear();
+  pfc_hcal_diff_.clear();
+  pfc_eta_diff_.clear();
+  pfc_phi_diff_.clear();
+  pfc_charge_diff_.clear();
+  pfc_id_diff_.clear();
+  pfc_trackRef_p_diff_.clear();
+  pfc_trackRef_pt_diff_.clear();
+  pfc_trackRef_eta_diff_.clear();
+  pfc_trackRef_phi_diff_.clear();
+  pfc_trackRef_nValidPixelHits_diff_.clear();
+  pfc_trackRef_nValidTrackerHits_diff_.clear();
 
 }
 
